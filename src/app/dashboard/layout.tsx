@@ -1,5 +1,7 @@
 import Link from "next/link"
+import { LayoutDashboard, Plus, Skull } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { buttonVariants } from "@/components/ui/button"
 import { UserNav } from "@/components/user-nav"
 
 export default async function DashboardLayout({
@@ -11,18 +13,27 @@ export default async function DashboardLayout({
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-14 items-center justify-between px-4 md:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg">
-            🪦 Project Graveyard
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="border-b bg-background">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
+          <Link href="/dashboard" className="flex items-center gap-2 text-base font-semibold">
+            <Skull className="size-5" />
+            Project Graveyard
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <Link
+              href="/dashboard"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              <LayoutDashboard className="size-4" />
+              Dashboard
+            </Link>
             <Link
               href="/dashboard/new"
-              className="inline-flex h-7 items-center justify-center rounded-md border border-border bg-background px-2.5 text-[0.8rem] font-medium whitespace-nowrap text-foreground hover:bg-muted"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              + Yeni Proje
+              <Plus className="size-4" />
+              New
             </Link>
             <UserNav user={user} />
           </div>

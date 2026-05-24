@@ -1,68 +1,81 @@
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { STATUS_LABELS, STATUS_ICONS } from "@/lib/constants"
-import type { Project } from "@/types"
+import { STATUS_LABELS } from "@/lib/constants"
+import type { Project, ProjectStatus } from "@/types"
 
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({
+  project,
+  currentTime,
+}: {
+  project: Project
+  currentTime: number
+}) {
   const daysSinceUpdate = Math.floor(
-    (Date.now() - new Date(project.last_updated_at).getTime()) / (1000 * 60 * 60 * 24)
+    (currentTime - new Date(project.last_updated_at).getTime()) / (1000 * 60 * 60 * 24)
   )
+  const technologies = project.technologies ?? []
+  const progress = Math.min(100, Math.max(0, project.progress))
 
   return (
-    <Link href={`/dashboard/${project.id}`}>
-      <Card className="h-full transition-colors hover:bg-accent/50">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="space-y-1">
-              <CardTitle className="text-base">{project.name}</CardTitle>
-              <CardDescription className="line-clamp-2 text-xs">
-                {project.description ?? "No description"}
-              </CardDescription>
-            </div>
-            <span className="shrink-0 text-sm">
-              {STATUS_ICONS[project.status]}
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
+    <Link
+      href={`/dashboard/${project.id}`}
+      className="block p-4 transition-colors hover:bg-muted/50"
+    >
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px_120px] md:items-center">
+        <div className="min-w-0 space-y-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <h2 className="truncate text-base font-medium">{project.name}</h2>
+            <span
+              className={[
+                "shrink-0 text-sm",
+                getStatusClass(project.status),
+              ].join(" ")}
+            >
               {STATUS_LABELS[project.status]}
             </span>
-            <span className="text-muted-foreground">
-              %{project.progress}
-            </span>
           </div>
+          <p className="line-clamp-2 max-w-2xl text-sm leading-5 text-muted-foreground">
+            {project.description ?? "No description"}
+          </p>
+          {technologies.length > 0 && (
+            <p className="truncate text-xs text-muted-foreground">
+              {technologies.slice(0, 4).join(", ")}
+              {technologies.length > 4 ? ` +${technologies.length - 4}` : ""}
+            </p>
+          )}
+        </div>
 
-          <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Progress</span>
+            <span className="tabular-nums">{progress}%</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-sm bg-secondary">
             <div
-              className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${project.progress}%` }}
+              className="h-full rounded-sm bg-primary"
+              style={{ width: `${progress}%` }}
             />
           </div>
+        </div>
 
-          <div className="flex flex-wrap gap-1">
-            {project.technologies?.map((tech) => (
-              <Badge key={tech} variant="secondary" className="text-xs">
-                {tech}
-              </Badge>
-            ))}
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            {daysSinceUpdate === 0
-              ? "Updated today"
-              : `Updated ${daysSinceUpdate} day${daysSinceUpdate === 1 ? "" : "s"} ago`}
-          </p>
-        </CardContent>
-      </Card>
+        <p className="text-sm text-muted-foreground md:text-right">
+          {daysSinceUpdate === 0
+            ? "Updated today"
+            : `${daysSinceUpdate}d ago`}
+        </p>
+      </div>
     </Link>
   )
+}
+
+function getStatusClass(status: ProjectStatus): string {
+  switch (status) {
+    case "active":
+      return "text-foreground"
+    case "paused":
+      return "text-amber-700 dark:text-amber-300"
+    case "abandoned":
+      return "text-muted-foreground"
+    case "completed":
+      return "text-emerald-700 dark:text-emerald-300"
+  }
 }

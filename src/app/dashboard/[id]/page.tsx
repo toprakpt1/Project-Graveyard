@@ -6,7 +6,6 @@ import { Separator } from "@/components/ui/separator"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -44,8 +43,9 @@ export default async function ProjectDetailPage({
 
   const notes = notesRaw as ProjectNote[] | null
 
+  const currentTime = new Date().getTime()
   const daysSinceUpdate = Math.floor(
-    (Date.now() - new Date(project.last_updated_at).getTime()) / (1000 * 60 * 60 * 24)
+    (currentTime - new Date(project.last_updated_at).getTime()) / (1000 * 60 * 60 * 24)
   )
 
   const stoppedReasonLabel = project.stopped_reason

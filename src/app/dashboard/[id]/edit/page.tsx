@@ -25,7 +25,7 @@ export default async function EditProjectPage({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Projeyi Düzenle</h1>
+      <h1 className="text-2xl font-bold mb-6">Edit Project</h1>
       <ProjectForm project={project} />
     </div>
   )

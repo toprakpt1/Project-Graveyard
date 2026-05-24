@@ -23,7 +23,7 @@ export function ProjectCard({ project }: { project: Project }) {
             <div className="space-y-1">
               <CardTitle className="text-base">{project.name}</CardTitle>
               <CardDescription className="line-clamp-2 text-xs">
-                {project.description ?? "Açıklama yok"}
+                {project.description ?? "No description"}
               </CardDescription>
             </div>
             <span className="shrink-0 text-sm">
@@ -58,8 +58,8 @@ export function ProjectCard({ project }: { project: Project }) {
 
           <p className="text-xs text-muted-foreground">
             {daysSinceUpdate === 0
-              ? "Bugün güncellendi"
-              : `${daysSinceUpdate} gün önce güncellendi`}
+              ? "Updated today"
+              : `Updated ${daysSinceUpdate} day${daysSinceUpdate === 1 ? "" : "s"} ago`}
           </p>
         </CardContent>
       </Card>

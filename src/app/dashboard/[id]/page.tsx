@@ -61,7 +61,7 @@ export default async function ProjectDetailPage({
             <h1 className="text-2xl font-bold">{project.name}</h1>
           </div>
           <p className="text-muted-foreground mt-1">
-            {project.description ?? "Açıklama yok"}
+            {project.description ?? "No description"}
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
@@ -69,7 +69,7 @@ export default async function ProjectDetailPage({
             href={`/dashboard/${project.id}/edit`}
             className="inline-flex h-7 items-center justify-center rounded-md border border-border bg-background px-2.5 text-[0.8rem] font-medium whitespace-nowrap text-foreground hover:bg-muted"
           >
-            Düzenle
+            Edit
           </Link>
         </div>
       </div>
@@ -78,7 +78,7 @@ export default async function ProjectDetailPage({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Durum
+              Status
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -88,7 +88,7 @@ export default async function ProjectDetailPage({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              İlerleme
+              Progress
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -104,12 +104,12 @@ export default async function ProjectDetailPage({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Başlangıç
+              Started
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-semibold">
-              {new Date(project.started_at).toLocaleDateString("tr-TR", {
+              {new Date(project.started_at).toLocaleDateString("en-US", {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
@@ -120,14 +120,14 @@ export default async function ProjectDetailPage({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Son Güncelleme
+              Last Updated
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-semibold">
               {daysSinceUpdate === 0
-                ? "Bugün"
-                : `${daysSinceUpdate} gün önce`}
+                ? "Today"
+                : `${daysSinceUpdate} day${daysSinceUpdate === 1 ? "" : "s"} ago`}
             </p>
           </CardContent>
         </Card>
@@ -137,7 +137,7 @@ export default async function ProjectDetailPage({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Hedef
+              Goal
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -162,7 +162,7 @@ export default async function ProjectDetailPage({
             rel="noopener noreferrer"
             className="underline underline-offset-4 hover:text-primary"
           >
-            GitHub'da görüntüle →
+            View on GitHub →
           </a>
         </p>
       )}
@@ -171,7 +171,7 @@ export default async function ProjectDetailPage({
         <Card className="border-destructive/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-destructive">
-              Neden Durdu?
+              Why Stopped?
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -183,7 +183,7 @@ export default async function ProjectDetailPage({
       <Separator />
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">Günlük / Notlar</h2>
+        <h2 className="text-lg font-semibold mb-4">Journal / Notes</h2>
         <NoteTimeline projectId={project.id} notes={notes ?? []} />
       </div>
     </div>

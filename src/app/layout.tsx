@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Project Graveyard",
-  description: "Yarım bırakılan projeleri kurtarma aracı",
+  description: "A graveyard for your unfinished projects — collect, track, and resurrect them.",
 }
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="tr"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >

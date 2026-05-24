@@ -73,12 +73,12 @@ export function ProjectForm({ project }: { project: Project }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Proje Detayları</CardTitle>
-          <CardDescription>Projenin temel bilgileri.</CardDescription>
+          <CardTitle>Project Details</CardTitle>
+          <CardDescription>Basic information about your project.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Proje Adı *</Label>
+            <Label htmlFor="name">Project Name *</Label>
             <Input
               id="name"
               name="name"
@@ -88,7 +88,7 @@ export function ProjectForm({ project }: { project: Project }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Açıklama</Label>
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               name="description"
@@ -98,7 +98,7 @@ export function ProjectForm({ project }: { project: Project }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="goal">Hedef</Label>
+            <Label htmlFor="goal">Goal</Label>
             <Textarea
               id="goal"
               name="goal"
@@ -108,17 +108,17 @@ export function ProjectForm({ project }: { project: Project }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="technologies">Teknolojiler</Label>
+            <Label htmlFor="technologies">Technologies</Label>
             <Input
               id="technologies"
               name="technologies"
               defaultValue={project.technologies?.join(", ") ?? ""}
-              placeholder="React, Supabase, Expo (virgülle ayır)"
+              placeholder="React, Supabase, Expo (comma-separated)"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="github_repo_url">GitHub Repo Linki</Label>
+            <Label htmlFor="github_repo_url">GitHub Repo URL</Label>
             <Input
               id="github_repo_url"
               name="github_repo_url"
@@ -131,12 +131,12 @@ export function ProjectForm({ project }: { project: Project }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Durum & İlerleme</CardTitle>
-          <CardDescription>Projenin şu anki durumu.</CardDescription>
+          <CardTitle>Status & Progress</CardTitle>
+          <CardDescription>Current state of your project.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="status">Durum</Label>
+            <Label htmlFor="status">Status</Label>
             <Select name="status" defaultValue={project.status}>
               <SelectTrigger>
                 <SelectValue />
@@ -152,7 +152,7 @@ export function ProjectForm({ project }: { project: Project }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="progress">İlerleme (%)</Label>
+            <Label htmlFor="progress">Progress (%)</Label>
             <Input
               id="progress"
               name="progress"
@@ -164,16 +164,16 @@ export function ProjectForm({ project }: { project: Project }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="stopped_reason">Neden Durdu?</Label>
+            <Label htmlFor="stopped_reason">Why Stopped?</Label>
             <Select
               name="stopped_reason"
               defaultValue={project.stopped_reason ?? ""}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seç..." />
+                <SelectValue placeholder="Select..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Seçilmedi</SelectItem>
+                <SelectItem value="">Not selected</SelectItem>
                 {STOPPED_REASONS.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
                     {r.label}
@@ -189,14 +189,14 @@ export function ProjectForm({ project }: { project: Project }) {
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading}>
-          {loading ? "Kaydediliyor..." : "Kaydet"}
+          {loading ? "Saving..." : "Save"}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => router.back()}
         >
-          İptal
+          Cancel
         </Button>
       </div>
     </form>

@@ -1,19 +1,19 @@
 import type { StoppedReason } from "@/types"
 
 export const STOPPED_REASONS: { value: StoppedReason; label: string }[] = [
-  { value: "motivation", label: "Motivasyon düştü" },
-  { value: "scope_creep", label: "Çok büyüdü" },
-  { value: "technical", label: "Teknik sorun" },
-  { value: "no_time", label: "Zaman yok" },
-  { value: "changed_mind", label: "Fikir değişti" },
-  { value: "other", label: "Diğer" },
+  { value: "motivation", label: "Lost motivation" },
+  { value: "scope_creep", label: "Scope creep" },
+  { value: "technical", label: "Technical issue" },
+  { value: "no_time", label: "No time" },
+  { value: "changed_mind", label: "Changed mind" },
+  { value: "other", label: "Other" },
 ]
 
 export const STATUS_LABELS: Record<string, string> = {
-  active: "Aktif",
-  paused: "Durdu",
-  abandoned: "Terk edildi",
-  completed: "Tamamlandı",
+  active: "Active",
+  paused: "Paused",
+  abandoned: "Abandoned",
+  completed: "Completed",
 }
 
 export const STATUS_ICONS: Record<string, string> = {

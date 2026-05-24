@@ -35,7 +35,7 @@ export default function NewProjectPage() {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      setError("Oturum bulunamadı")
+      setError("Session not found")
       setLoading(false)
       return
     }
@@ -67,15 +67,15 @@ export default function NewProjectPage() {
     <div className="mx-auto max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle>Yeni Proje</CardTitle>
+          <CardTitle>New Project</CardTitle>
           <CardDescription>
-            Kurtarmak istediğin projeyi tanımla.
+            Define the project you want to resurrect.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Proje Adı *</Label>
+              <Label htmlFor="name">Project Name *</Label>
               <Input
                 id="name"
                 name="name"
@@ -85,41 +85,41 @@ export default function NewProjectPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Açıklama</Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 name="description"
-                placeholder="Kısa bir açıklama..."
+                placeholder="A short description..."
                 rows={3}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="goal">Hedef</Label>
+              <Label htmlFor="goal">Goal</Label>
               <Textarea
                 id="goal"
                 name="goal"
-                placeholder="Bu projeyle neyi başarmak istiyorsun?"
+                placeholder="What do you want to achieve with this project?"
                 rows={2}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="technologies">Teknolojiler</Label>
+              <Label htmlFor="technologies">Technologies</Label>
               <Input
                 id="technologies"
                 name="technologies"
-                placeholder="React, Supabase, Expo (virgülle ayır)"
+                placeholder="React, Supabase, Expo (comma-separated)"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="github_repo_url">GitHub Repo Linki</Label>
+              <Label htmlFor="github_repo_url">GitHub Repo URL</Label>
               <Input
                 id="github_repo_url"
                 name="github_repo_url"
                 type="url"
-                placeholder="https://github.com/kullanici/proje"
+                placeholder="https://github.com/user/repo"
               />
             </div>
 
@@ -129,14 +129,14 @@ export default function NewProjectPage() {
 
             <div className="flex gap-3">
               <Button type="submit" disabled={loading}>
-                {loading ? "Oluşturuluyor..." : "Proje Oluştur"}
+                {loading ? "Creating..." : "Create Project"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
               >
-                İptal
+                Cancel
               </Button>
             </div>
           </form>

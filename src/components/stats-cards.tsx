@@ -13,7 +13,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Toplam Proje
+            Total Projects
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -23,7 +23,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Tamamlanan
+            Completed
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -35,7 +35,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Yarıda Kalan
+            Abandoned
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -47,11 +47,11 @@ export function StatsCards({ stats }: { stats: Stats }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Ortalama Ömür
+            Avg. Lifespan
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{stats.avgLifespan} gün</p>
+          <p className="text-2xl font-bold">{stats.avgLifespan} days</p>
         </CardContent>
       </Card>
     </div>

@@ -44,7 +44,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">🪦 Project Graveyard</CardTitle>
-          <CardDescription>Yeni hesap oluştur</CardDescription>
+          <CardDescription>Create a new account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
@@ -53,14 +53,14 @@ export default function RegisterPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="ornek@email.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Şifre</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -75,13 +75,13 @@ export default function RegisterPage() {
               <p className="text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Kaydediliyor..." : "Kayıt Ol"}
+              {loading ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Zaten hesabın var mı?{" "}
+            Already have an account?{" "}
             <a href="/login" className="underline underline-offset-4 hover:text-primary">
-              Giriş yap
+              Sign in
             </a>
           </p>
         </CardContent>

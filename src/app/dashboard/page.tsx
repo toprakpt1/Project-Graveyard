@@ -25,11 +25,11 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Projelerin</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Your Projects</h1>
         <p className="text-muted-foreground">
           {safeProjects.length === 0
-            ? "Henüz proje eklemedin. Yeni bir proje ekleyerek başla!"
-            : `${safeProjects.length} proje — ${stats.completed} tamamlanmış, ${stats.abandoned} yarıda kalmış`}
+            ? "You haven't added any projects yet. Start by adding one!"
+            : `${safeProjects.length} project${safeProjects.length === 1 ? "" : "s"} — ${stats.completed} completed, ${stats.abandoned} abandoned`}
         </p>
       </div>
 
@@ -38,15 +38,15 @@ export default async function DashboardPage() {
       {safeProjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-4xl mb-4">🪦</p>
-          <h2 className="text-xl font-semibold mb-2">Henüz proje yok</h2>
+          <h2 className="text-xl font-semibold mb-2">No projects yet</h2>
           <p className="text-muted-foreground mb-6">
-            İlk projeni ekleyerek mezarlığı büyütmeye başla!
+            Add your first project to grow the graveyard!
           </p>
           <a
             href="/dashboard/new"
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
           >
-            + Yeni Proje
+            + New Project
           </a>
         </div>
       ) : (

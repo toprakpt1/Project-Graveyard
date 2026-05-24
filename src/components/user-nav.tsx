@@ -47,7 +47,7 @@ export function UserNav({ user }: { user: User | null }) {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
-          Çıkış Yap
+          Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

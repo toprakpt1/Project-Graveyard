@@ -57,7 +57,7 @@ export function NoteTimeline({
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return date.toLocaleDateString("tr-TR", {
+    return date.toLocaleDateString("en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -70,13 +70,13 @@ export function NoteTimeline({
     <div className="space-y-4">
       <div className="space-y-2">
         <Textarea
-          placeholder="Bugün ne yaptın?"
+          placeholder="What did you work on today?"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={3}
         />
         <Button onClick={handleAdd} disabled={loading || !content.trim()}>
-          {loading ? "Ekleniyor..." : "Not Ekle"}
+          {loading ? "Adding..." : "Add Note"}
         </Button>
       </div>
 
@@ -84,7 +84,7 @@ export function NoteTimeline({
 
       {notes.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center">
-          Henüz not eklenmemiş.
+          No notes yet.
         </p>
       ) : (
         <div className="space-y-3">
@@ -97,7 +97,7 @@ export function NoteTimeline({
                     onClick={() => handleDelete(note.id)}
                     className="shrink-0 text-xs text-muted-foreground hover:text-destructive transition-colors"
                   >
-                    Sil
+                    Delete
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">

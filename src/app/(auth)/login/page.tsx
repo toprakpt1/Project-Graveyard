@@ -41,7 +41,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">🪦 Project Graveyard</CardTitle>
-          <CardDescription>Giriş yap</CardDescription>
+          <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -50,14 +50,14 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="ornek@email.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Şifre</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -71,13 +71,13 @@ export default function LoginPage() {
               <p className="text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Hesabın yok mu?{" "}
+            Don't have an account?{" "}
             <a href="/register" className="underline underline-offset-4 hover:text-primary">
-              Kayıt ol
+              Sign up
             </a>
           </p>
         </CardContent>

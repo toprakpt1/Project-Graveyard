@@ -3,7 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, CheckCircle2, LockKeyhole, Mail, Skull } from "lucide-react"
+import { ArrowLeft, LockKeyhole, Mail } from "lucide-react"
+import { AuthAside } from "../auth-aside"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,40 +41,16 @@ export default function LoginPage() {
 
   return (
     <main className="grid min-h-screen bg-background lg:grid-cols-[1fr_460px]">
-      <section className="hidden border-r bg-muted/30 lg:flex lg:flex-col lg:justify-between lg:p-10">
-        <Link href="/" className="flex w-fit items-center gap-2 text-sm font-medium">
-          <div className="flex size-8 items-center justify-center rounded-lg border bg-background">
-            <Skull className="size-4" />
-          </div>
-          Project Graveyard
-        </Link>
-
-        <div className="max-w-lg">
-          <h1 className="text-4xl font-semibold tracking-tight">
-            Pick up where your projects stopped.
-          </h1>
-          <p className="mt-4 text-base leading-7 text-muted-foreground">
-            Sign in to review blockers, notes, status changes, and the projects
-            worth bringing back into active work.
-          </p>
-          <div className="mt-8 grid gap-4 text-sm">
-            {[
-              "Search your saved project history",
-              "Update progress and restart notes",
-              "Keep completed work separate from stalled ideas",
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-3">
-                <CheckCircle2 className="size-4" />
-                <span className="text-muted-foreground">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-sm text-muted-foreground">
-          A quiet archive for unfinished software, experiments, and ideas.
-        </p>
-      </section>
+      <AuthAside
+        title="Pick up where your projects stopped."
+        description="Sign in to review blockers, notes, status changes, and the projects worth bringing back into active work."
+        checklist={[
+          "Search your saved project history",
+          "Update progress and restart notes",
+          "Keep completed work separate from stalled ideas",
+        ]}
+        footer="A quiet archive for unfinished software, experiments, and ideas."
+      />
 
       <section className="flex min-h-screen items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">

@@ -3,7 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, CheckCircle2, Mail, Skull, UserPlus } from "lucide-react"
+import { ArrowLeft, Mail, UserPlus } from "lucide-react"
+import { AuthAside } from "../auth-aside"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -43,40 +44,16 @@ export default function RegisterPage() {
 
   return (
     <main className="grid min-h-screen bg-background lg:grid-cols-[1fr_460px]">
-      <section className="hidden border-r bg-muted/30 lg:flex lg:flex-col lg:justify-between lg:p-10">
-        <Link href="/" className="flex w-fit items-center gap-2 text-sm font-medium">
-          <div className="flex size-8 items-center justify-center rounded-lg border bg-background">
-            <Skull className="size-4" />
-          </div>
-          Project Graveyard
-        </Link>
-
-        <div className="max-w-lg">
-          <h1 className="text-4xl font-semibold tracking-tight">
-            Build an archive before the next idea disappears.
-          </h1>
-          <p className="mt-4 text-base leading-7 text-muted-foreground">
-            Create a workspace for paused builds, abandoned experiments, and
-            projects that need one clear next step.
-          </p>
-          <div className="mt-8 grid gap-4 text-sm">
-            {[
-              "Track why each project stopped",
-              "Save stack, progress, and notes together",
-              "Choose what to revive without starting from memory",
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-3">
-                <CheckCircle2 className="size-4" />
-                <span className="text-muted-foreground">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-sm text-muted-foreground">
-          Start with one project. The archive becomes useful immediately.
-        </p>
-      </section>
+      <AuthAside
+        title="Build an archive before the next idea disappears."
+        description="Create a workspace for paused builds, abandoned experiments, and projects that need one clear next step."
+        checklist={[
+          "Track why each project stopped",
+          "Save stack, progress, and notes together",
+          "Choose what to revive without starting from memory",
+        ]}
+        footer="Start with one project. The archive becomes useful immediately."
+      />
 
       <section className="flex min-h-screen items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">

@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { ActivityHeatmap } from "@/components/activity-heatmap"
 import { ProjectCard } from "@/components/project-card"
+import { ResurrectionStats } from "@/components/resurrection-stats"
 import { StatsCards } from "@/components/stats-cards"
 import { STATUS_LABELS } from "@/lib/constants"
 import type { Project, ProjectStatus } from "@/types"
@@ -35,6 +37,11 @@ export default async function DashboardPage({
     .order("pinned_at", { ascending: false, nullsFirst: false })
     .order("last_updated_at", { ascending: false })
     .returns<Project[]>()
+  const { data: activityNotes } = await supabase
+    .from("project_notes")
+    .select("created_at")
+    .order("created_at", { ascending: false })
+    .limit(500)
 
   const safeProjects = projects ?? []
   const currentTime = new Date().getTime()
@@ -72,6 +79,19 @@ export default async function DashboardPage({
     recent: activeProjects.filter((p) => daysSince(p.last_updated_at, currentTime) <= 7).length,
     archived: archivedCount,
   }
+  const activityDates = [
+    ...safeProjects.flatMap((project) =>
+      [
+        project.created_at,
+        project.last_updated_at,
+        project.restarted_at,
+        project.archived_at,
+      ].filter(Boolean)
+    ),
+    ...((activityNotes as { created_at: string }[] | null) ?? []).map(
+      (note) => note.created_at
+    ),
+  ] as string[]
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -94,6 +114,11 @@ export default async function DashboardPage({
 
       <StatsCards stats={stats} />
 
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <ActivityHeatmap activityDates={activityDates} />
+        <ResurrectionStats projects={safeProjects} />
+      </div>
+
       {activeProjects.length === 0 && archivedCount === 0 ? (
         <div className="flex min-h-72 flex-col items-start justify-center rounded-lg border bg-card p-6">
           <h2 className="text-lg font-semibold">No projects yet</h2>
@@ -113,12 +138,12 @@ export default async function DashboardPage({
           <h2 className="text-lg font-semibold">All projects archived</h2>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
             All your projects are archived. Switch to the{" "}
-            <a
+            <Link
               href="/dashboard?status=archived"
               className="underline underline-offset-4 hover:text-foreground"
             >
               archived view
-            </a>{" "}
+            </Link>{" "}
             to see them.
           </p>
           <Link

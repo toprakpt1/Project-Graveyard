@@ -9,13 +9,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { ActivityHeatmap } from "@/components/activity-heatmap"
 import { NoteTimeline } from "@/components/note-timeline"
+import { ProgressTimeline } from "@/components/progress-timeline"
+import { ProjectMilestones } from "@/components/project-milestones"
 import { ArchiveDialog, RestoreButton } from "@/components/archive-dialog"
 import { DeleteDialog } from "@/components/delete-dialog"
 import { PinButton } from "@/components/pin-button"
 import { RestartButton } from "@/components/restart-button"
 import { STATUS_LABELS, STATUS_ICONS, STOPPED_REASONS } from "@/lib/constants"
-import type { Project, ProjectNote } from "@/types"
+import type {
+  Project,
+  ProjectMilestone,
+  ProjectNote,
+  ProjectStatusEvent,
+} from "@/types"
 
 export const dynamic = "force-dynamic"
 
@@ -47,6 +55,35 @@ export default async function ProjectDetailPage({
 
   const notes = notesRaw as ProjectNote[] | null
 
+  const { data: milestonesRaw } = await supabase
+    .from("project_milestones")
+    .select("*")
+    .eq("project_id", id)
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: true })
+
+  const milestones = milestonesRaw as ProjectMilestone[] | null
+
+  const { data: statusEventsRaw } = await supabase
+    .from("project_status_events")
+    .select("*")
+    .eq("project_id", id)
+    .order("happened_at", { ascending: true })
+
+  const statusEvents = statusEventsRaw as ProjectStatusEvent[] | null
+  const timelineEvents =
+    statusEvents && statusEvents.length > 0
+      ? statusEvents
+      : buildFallbackTimeline(project)
+  const activityDates = [
+    project.created_at,
+    project.last_updated_at,
+    project.restarted_at,
+    project.archived_at,
+    ...(notes ?? []).map((note) => note.created_at),
+    ...timelineEvents.map((event) => event.happened_at),
+  ].filter(Boolean) as string[]
+
   const currentTime = new Date().getTime()
   const daysSinceUpdate = Math.floor(
     (currentTime - new Date(project.last_updated_at).getTime()) / (1000 * 60 * 60 * 24)
@@ -77,13 +114,21 @@ export default async function ProjectDetailPage({
           <PinButton projectId={project.id} pinned={project.pinned} />
           {isArchived ? (
             <>
-              <RestoreButton projectId={project.id} />
+              <RestoreButton
+                projectId={project.id}
+                currentStatus={project.status}
+                projectProgress={project.progress}
+              />
               <DeleteDialog projectId={project.id} />
             </>
           ) : (
             <>
               {(project.status === "abandoned" || project.status === "paused") && (
-                <RestartButton projectId={project.id} />
+                <RestartButton
+                  projectId={project.id}
+                  currentStatus={project.status}
+                  projectProgress={project.progress}
+                />
               )}
               <Link
                 href={`/dashboard/${project.id}/edit`}
@@ -91,7 +136,11 @@ export default async function ProjectDetailPage({
               >
                 Edit
               </Link>
-              <ArchiveDialog projectId={project.id} />
+              <ArchiveDialog
+                projectId={project.id}
+                currentStatus={project.status}
+                projectProgress={project.progress}
+              />
             </>
           )}
         </div>
@@ -268,6 +317,20 @@ export default async function ProjectDetailPage({
         </Card>
       )}
 
+      <ProjectMilestones
+        projectId={project.id}
+        projectStatus={project.status}
+        projectProgress={project.progress}
+        milestones={milestones ?? []}
+      />
+
+      <ActivityHeatmap
+        title="Project Activity"
+        activityDates={activityDates}
+      />
+
+      <ProgressTimeline events={timelineEvents} />
+
       <Separator />
 
       <div>
@@ -286,4 +349,70 @@ function formatGitHubDate(value: string | null): string {
     day: "numeric",
     year: "numeric",
   })
+}
+
+function buildFallbackTimeline(project: Project): ProjectStatusEvent[] {
+  const events: ProjectStatusEvent[] = [
+    {
+      id: `${project.id}-created`,
+      project_id: project.id,
+      event_type: "created",
+      from_status: null,
+      to_status: project.restarted_at ? "active" : project.status,
+      progress: 0,
+      note: "Project was added to the graveyard.",
+      happened_at: project.started_at ?? project.created_at,
+      created_at: project.created_at,
+    },
+  ]
+
+  if (project.restarted_at) {
+    events.push({
+      id: `${project.id}-restarted`,
+      project_id: project.id,
+      event_type: "resurrected",
+      from_status: project.stopped_reason ? "abandoned" : "paused",
+      to_status: "active",
+      progress: project.progress,
+      note: "Project returned to active work.",
+      happened_at: project.restarted_at,
+      created_at: project.restarted_at,
+    })
+  }
+
+  if (project.archived_at) {
+    events.push({
+      id: `${project.id}-archived`,
+      project_id: project.id,
+      event_type: "archived",
+      from_status: project.status,
+      to_status: project.status,
+      progress: project.progress,
+      note: "Project was archived.",
+      happened_at: project.archived_at,
+      created_at: project.archived_at,
+    })
+  }
+
+  if (
+    project.last_updated_at !== project.started_at &&
+    project.last_updated_at !== project.restarted_at &&
+    project.last_updated_at !== project.archived_at
+  ) {
+    events.push({
+      id: `${project.id}-updated`,
+      project_id: project.id,
+      event_type: "progress_update",
+      from_status: project.status,
+      to_status: project.status,
+      progress: project.progress,
+      note: "Latest saved project state.",
+      happened_at: project.last_updated_at,
+      created_at: project.last_updated_at,
+    })
+  }
+
+  return events.sort(
+    (a, b) => new Date(a.happened_at).getTime() - new Date(b.happened_at).getTime()
+  )
 }

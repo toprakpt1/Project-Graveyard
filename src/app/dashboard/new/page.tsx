@@ -42,24 +42,41 @@ export default function NewProjectPage() {
       return
     }
 
-    const { error: insertError } = await supabase.from("projects").insert({
-      user_id: user.id,
-      name,
-      description: description || null,
-      goal: goal || null,
-      technologies,
-      tags,
-      github_repo_url: githubRepoUrl || null,
-      status: "active",
-      progress: 0,
-      started_at: new Date().toISOString(),
-      last_updated_at: new Date().toISOString(),
-    })
+    const now = new Date().toISOString()
+    const { data: createdProject, error: insertError } = await supabase
+      .from("projects")
+      .insert({
+        user_id: user.id,
+        name,
+        description: description || null,
+        goal: goal || null,
+        technologies,
+        tags,
+        github_repo_url: githubRepoUrl || null,
+        status: "active",
+        progress: 0,
+        started_at: now,
+        last_updated_at: now,
+      })
+      .select("id")
+      .single()
 
     if (insertError) {
       setError(insertError.message)
       setLoading(false)
       return
+    }
+
+    if (createdProject) {
+      await supabase.from("project_status_events").insert({
+        project_id: createdProject.id,
+        event_type: "created",
+        from_status: null,
+        to_status: "active",
+        progress: 0,
+        note: "Project was created.",
+        happened_at: now,
+      })
     }
 
     router.push("/dashboard")

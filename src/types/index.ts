@@ -56,6 +56,37 @@ export interface ProjectNote {
   updated_at: string
 }
 
+export interface ProjectMilestone {
+  id: string
+  project_id: string
+  title: string
+  completed: boolean
+  position: number
+  completed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type ProjectStatusEventType =
+  | "created"
+  | "status_change"
+  | "progress_update"
+  | "resurrected"
+  | "archived"
+  | "restored"
+
+export interface ProjectStatusEvent {
+  id: string
+  project_id: string
+  event_type: ProjectStatusEventType
+  from_status: ProjectStatus | null
+  to_status: ProjectStatus
+  progress: number
+  note: string | null
+  happened_at: string
+  created_at: string
+}
+
 export interface GithubConnection {
   id: string
   user_id: string

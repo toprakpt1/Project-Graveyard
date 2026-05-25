@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
+import type { ProjectStatus } from "@/types"
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-export function RestartButton({ projectId }: { projectId: string }) {
+export function RestartButton({
+  projectId,
+  currentStatus,
+  projectProgress,
+}: {
+  projectId: string
+  currentStatus: ProjectStatus
+  projectProgress: number
+}) {
   const router = useRouter()
   const supabase = createClient()
   const [open, setOpen] = useState(false)
@@ -22,19 +31,29 @@ export function RestartButton({ projectId }: { projectId: string }) {
 
   async function handleRestart() {
     setLoading(true)
+    const now = new Date().toISOString()
     await supabase
       .from("projects")
       .update({
         status: "active",
         stopped_reason: null,
-        restarted_at: new Date().toISOString(),
-        last_updated_at: new Date().toISOString(),
+        restarted_at: now,
+        last_updated_at: now,
       })
       .eq("id", projectId)
 
     await supabase.from("project_notes").insert({
       project_id: projectId,
       content: "Restarted this project.",
+    })
+    await supabase.from("project_status_events").insert({
+      project_id: projectId,
+      event_type: "resurrected",
+      from_status: currentStatus,
+      to_status: "active",
+      progress: projectProgress,
+      note: "Project returned to active work.",
+      happened_at: now,
     })
 
     setLoading(false)

@@ -59,7 +59,9 @@ export function ProjectForm({ project }: { project: Project }) {
       const tags = parseProjectTags(form.get("tags") as string)
       const githubRepoUrl = form.get("github_repo_url") as string
       const progress = parseInt(form.get("progress") as string) || 0
+      const safeProgress = Math.min(100, Math.max(0, progress))
       const stoppedReason = form.get("stopped_reason") as StoppedReason | ""
+      const now = new Date().toISOString()
 
       const updates: Record<string, unknown> = {
         name,
@@ -69,13 +71,13 @@ export function ProjectForm({ project }: { project: Project }) {
         tags,
         github_repo_url: githubRepoUrl || null,
         status,
-        progress: Math.min(100, Math.max(0, progress)),
-        last_updated_at: new Date().toISOString(),
+        progress: safeProgress,
+        last_updated_at: now,
       }
 
       if (isResurrecting) {
         updates.stopped_reason = null
-        updates.restarted_at = new Date().toISOString()
+        updates.restarted_at = now
       } else {
         updates.stopped_reason = stoppedReason || null
       }
@@ -95,6 +97,26 @@ export function ProjectForm({ project }: { project: Project }) {
         await supabase.from("project_notes").insert({
           project_id: project.id,
           content: "Restarted this project.",
+        })
+      }
+
+      const eventType = isResurrecting
+        ? "resurrected"
+        : status !== project.status
+          ? "status_change"
+          : safeProgress !== project.progress
+            ? "progress_update"
+            : null
+
+      if (eventType) {
+        await supabase.from("project_status_events").insert({
+          project_id: project.id,
+          event_type: eventType,
+          from_status: project.status,
+          to_status: status,
+          progress: safeProgress,
+          note: getStatusEventNote(eventType),
+          happened_at: now,
         })
       }
 
@@ -291,4 +313,15 @@ export function ProjectForm({ project }: { project: Project }) {
       </Dialog>
     </form>
   )
+}
+
+function getStatusEventNote(eventType: "resurrected" | "status_change" | "progress_update") {
+  switch (eventType) {
+    case "resurrected":
+      return "Project returned to active work."
+    case "status_change":
+      return "Project status was updated."
+    case "progress_update":
+      return "Project progress was updated."
+  }
 }

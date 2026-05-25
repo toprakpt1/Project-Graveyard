@@ -157,6 +157,11 @@ export default async function DashboardPage({
               value={getOldestUpdateLabel(safeProjects, currentTime)}
               detail="Longest time since a project was last touched."
             />
+            <DashboardNote
+              label="Top Technology"
+              value={getTopTechnologyLabel(safeProjects)}
+              detail="Most common stack entry across saved and synced projects."
+            />
           </aside>
         </div>
       )}
@@ -227,4 +232,18 @@ function calculateAvgLifespan(projects: Project[]): number {
   }, 0)
 
   return Math.round(totalDays / withDates.length)
+}
+
+function getTopTechnologyLabel(projects: Project[]): string {
+  const counts = new Map<string, number>()
+
+  for (const project of projects) {
+    for (const technology of project.technologies ?? []) {
+      counts.set(technology, (counts.get(technology) ?? 0) + 1)
+    }
+  }
+
+  const [topTechnology] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? []
+
+  return topTechnology ?? "None"
 }

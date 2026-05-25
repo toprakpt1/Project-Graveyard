@@ -167,6 +167,46 @@ export default async function ProjectDetailPage({
         </p>
       )}
 
+      {project.github_repo_id && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              GitHub Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <p className="text-muted-foreground">Repository</p>
+                <p className="mt-1 font-medium">
+                  {project.github_full_name ?? project.github_repo_url}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Last commit</p>
+                <p className="mt-1 font-medium">
+                  {formatGitHubDate(project.github_last_commit_at)}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Default branch</p>
+                <p className="mt-1 font-medium">
+                  {project.github_default_branch ?? "Unknown"}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Commit SHA</p>
+                <p className="mt-1 font-medium">
+                  {project.github_last_commit_sha
+                    ? project.github_last_commit_sha.slice(0, 7)
+                    : "Unknown"}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {stoppedReasonLabel && (
         <Card className="border-destructive/50">
           <CardHeader className="pb-2">
@@ -188,4 +228,14 @@ export default async function ProjectDetailPage({
       </div>
     </div>
   )
+}
+
+function formatGitHubDate(value: string | null): string {
+  if (!value) return "Unknown"
+
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
 }

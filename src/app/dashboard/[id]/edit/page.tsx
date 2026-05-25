@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { ProjectForm } from "@/components/project-form"
-import type { Project } from "@/types"
 
 export const dynamic = "force-dynamic"
 

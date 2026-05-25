@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { LayoutDashboard, Plus, Skull } from "lucide-react"
+import { LayoutDashboard, Plus, Settings, Skull } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { buttonVariants } from "@/components/ui/button"
 import { UserNav } from "@/components/user-nav"
@@ -34,6 +34,13 @@ export default async function DashboardLayout({
             >
               <Plus className="size-4" />
               New
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              <Settings className="size-4" />
+              Settings
             </Link>
             <UserNav user={user} />
           </div>

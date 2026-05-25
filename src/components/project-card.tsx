@@ -36,6 +36,11 @@ export function ProjectCard({
           <p className="line-clamp-2 max-w-2xl text-sm leading-5 text-muted-foreground">
             {project.description ?? "No description"}
           </p>
+          {project.github_full_name && (
+            <p className="truncate text-xs text-muted-foreground">
+              GitHub: {project.github_full_name}
+            </p>
+          )}
           {technologies.length > 0 && (
             <p className="truncate text-xs text-muted-foreground">
               {technologies.slice(0, 4).join(", ")}

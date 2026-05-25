@@ -37,11 +37,16 @@ export function UserNav({ user }: { user: User | null }) {
           </Avatar>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuContent className="w-56 max-w-[calc(100vw-1rem)]" align="end">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.email}</p>
+            <div className="flex min-w-0 flex-col space-y-1">
+              <p
+                className="truncate text-sm font-medium leading-none"
+                title={user.email ?? undefined}
+              >
+                {user.email}
+              </p>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>

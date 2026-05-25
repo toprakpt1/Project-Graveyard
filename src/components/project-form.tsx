@@ -15,16 +15,28 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { STOPPED_REASONS, STATUS_LABELS } from "@/lib/constants"
+import { parseProjectTags, SUGGESTED_PROJECT_TAGS } from "@/lib/tags"
 import type { Project, ProjectStatus, StoppedReason } from "@/types"
 
 const STATUS_OPTIONS: ProjectStatus[] = ["active", "paused", "abandoned", "completed"]
+const RESURRECTABLE_STATUSES: ProjectStatus[] = ["paused", "abandoned"]
 
 export function ProjectForm({ project }: { project: Project }) {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showResurrectDialog, setShowResurrectDialog] = useState(false)
+  const [pendingSubmit, setPendingSubmit] = useState<() => Promise<void>>()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -32,41 +44,71 @@ export function ProjectForm({ project }: { project: Project }) {
     setError(null)
 
     const form = new FormData(e.currentTarget)
-    const name = form.get("name") as string
-    const description = form.get("description") as string
-    const goal = form.get("goal") as string
-    const technologies = (form.get("technologies") as string)
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean)
-    const githubRepoUrl = form.get("github_repo_url") as string
     const status = form.get("status") as ProjectStatus
-    const progress = parseInt(form.get("progress") as string) || 0
-    const stoppedReason = form.get("stopped_reason") as StoppedReason | ""
+    const isResurrecting =
+      RESURRECTABLE_STATUSES.includes(project.status) && status === "active"
 
-    const { error: updateError } = await supabase
-      .from("projects")
-      .update({
+    async function doSubmit() {
+      const name = form.get("name") as string
+      const description = form.get("description") as string
+      const goal = form.get("goal") as string
+      const technologies = (form.get("technologies") as string)
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+      const tags = parseProjectTags(form.get("tags") as string)
+      const githubRepoUrl = form.get("github_repo_url") as string
+      const progress = parseInt(form.get("progress") as string) || 0
+      const stoppedReason = form.get("stopped_reason") as StoppedReason | ""
+
+      const updates: Record<string, unknown> = {
         name,
         description: description || null,
         goal: goal || null,
         technologies,
+        tags,
         github_repo_url: githubRepoUrl || null,
         status,
         progress: Math.min(100, Math.max(0, progress)),
-        stopped_reason: stoppedReason || null,
         last_updated_at: new Date().toISOString(),
-      })
-      .eq("id", project.id)
+      }
 
-    if (updateError) {
-      setError(updateError.message)
-      setLoading(false)
-      return
+      if (isResurrecting) {
+        updates.stopped_reason = null
+        updates.restarted_at = new Date().toISOString()
+      } else {
+        updates.stopped_reason = stoppedReason || null
+      }
+
+      const { error: updateError } = await supabase
+        .from("projects")
+        .update(updates)
+        .eq("id", project.id)
+
+      if (updateError) {
+        setError(updateError.message)
+        setLoading(false)
+        return
+      }
+
+      if (isResurrecting) {
+        await supabase.from("project_notes").insert({
+          project_id: project.id,
+          content: "Restarted this project.",
+        })
+      }
+
+      router.push(`/dashboard/${project.id}`)
+      router.refresh()
     }
 
-    router.push(`/dashboard/${project.id}`)
-    router.refresh()
+    if (isResurrecting) {
+      setPendingSubmit(() => doSubmit)
+      setShowResurrectDialog(true)
+      setLoading(false)
+    } else {
+      await doSubmit()
+    }
   }
 
   return (
@@ -115,6 +157,26 @@ export function ProjectForm({ project }: { project: Project }) {
               defaultValue={project.technologies?.join(", ") ?? ""}
               placeholder="React, Supabase, Expo (comma-separated)"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            <Input
+              id="tags"
+              name="tags"
+              defaultValue={project.tags?.join(", ") ?? ""}
+              placeholder="#idea, #mvp, #tutorial"
+            />
+            <div className="flex flex-wrap gap-2">
+              {SUGGESTED_PROJECT_TAGS.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-md border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -199,6 +261,34 @@ export function ProjectForm({ project }: { project: Project }) {
           Cancel
         </Button>
       </div>
+
+      <Dialog open={showResurrectDialog} onOpenChange={setShowResurrectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Restart this project?</DialogTitle>
+            <DialogDescription>
+              This project was {STATUS_LABELS[project.status].toLowerCase()}.
+              Setting it back to active will record a restart date and clear
+              the stopped reason. A note will be added to the journal.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResurrectDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              onClick={async () => {
+                setShowResurrectDialog(false)
+                setLoading(true)
+                await pendingSubmit?.()
+              }}
+            >
+              Restart
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </form>
   )
 }

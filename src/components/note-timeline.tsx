@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 import type { ProjectNote } from "@/types"
 
 export function NoteTimeline({
@@ -70,14 +71,17 @@ export function NoteTimeline({
     <div className="space-y-4">
       <div className="space-y-2">
         <Textarea
-          placeholder="What did you work on today?"
+          placeholder="What did you work on today? (Markdown supported)"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={3}
         />
-        <Button onClick={handleAdd} disabled={loading || !content.trim()}>
-          {loading ? "Adding..." : "Add Note"}
-        </Button>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Markdown supported</span>
+          <Button onClick={handleAdd} disabled={loading || !content.trim()}>
+            {loading ? "Adding..." : "Add Note"}
+          </Button>
+        </div>
       </div>
 
       <Separator />
@@ -92,7 +96,9 @@ export function NoteTimeline({
             <Card key={note.id}>
               <CardContent className="pt-4">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                  <div className="text-sm min-w-0">
+                    <MarkdownRenderer content={note.content} />
+                  </div>
                   <button
                     onClick={() => handleDelete(note.id)}
                     className="shrink-0 text-xs text-muted-foreground hover:text-destructive transition-colors"

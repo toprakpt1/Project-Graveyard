@@ -7,16 +7,20 @@ import type { Project, ProjectStatus } from "@/types"
 
 export const dynamic = "force-dynamic"
 
-const STATUS_FILTERS: Array<"all" | ProjectStatus> = [
+type StatusFilterOption = "all" | "archived" | ProjectStatus
+
+const STATUS_FILTERS: StatusFilterOption[] = [
   "all",
   "active",
   "paused",
   "abandoned",
   "completed",
+  "archived",
 ]
 
 type DashboardSearchParams = Promise<{
   status?: string | string[]
+  tag?: string | string[]
 }>
 
 export default async function DashboardPage({
@@ -28,6 +32,7 @@ export default async function DashboardPage({
   const { data: projects } = await supabase
     .from("projects")
     .select("*")
+    .order("pinned_at", { ascending: false, nullsFirst: false })
     .order("last_updated_at", { ascending: false })
     .returns<Project[]>()
 
@@ -37,20 +42,35 @@ export default async function DashboardPage({
   const requestedStatus = Array.isArray(params.status)
     ? params.status[0]
     : params.status
+  const requestedTag = Array.isArray(params.tag) ? params.tag[0] : params.tag
   const activeFilter = isStatusFilter(requestedStatus) ? requestedStatus : "all"
-  const filteredProjects =
-    activeFilter === "all"
-      ? safeProjects
-      : safeProjects.filter((project) => project.status === activeFilter)
+  const tagOptions = getTagOptions(safeProjects)
+  const activeTag = tagOptions.includes(requestedTag ?? "") ? requestedTag : undefined
+  const filteredProjects = safeProjects.filter((project) => {
+    const isArchived = project.archived_at !== null
+
+    if (activeFilter === "archived") return isArchived
+    if (isArchived) return false
+
+    const matchesStatus =
+      activeFilter === "all" || project.status === activeFilter
+    const matchesTag = !activeTag || (project.tags ?? []).includes(activeTag)
+
+    return matchesStatus && matchesTag
+  })
+
+  const activeProjects = safeProjects.filter((p) => !p.archived_at)
+  const archivedCount = safeProjects.filter((p) => p.archived_at).length
 
   const stats = {
-    total: safeProjects.length,
-    active: safeProjects.filter((p) => p.status === "active").length,
-    paused: safeProjects.filter((p) => p.status === "paused").length,
-    completed: safeProjects.filter((p) => p.status === "completed").length,
-    abandoned: safeProjects.filter((p) => p.status === "abandoned").length,
-    avgLifespan: calculateAvgLifespan(safeProjects),
-    recent: safeProjects.filter((p) => daysSince(p.last_updated_at, currentTime) <= 7).length,
+    total: activeProjects.length,
+    active: activeProjects.filter((p) => p.status === "active").length,
+    paused: activeProjects.filter((p) => p.status === "paused").length,
+    completed: activeProjects.filter((p) => p.status === "completed").length,
+    abandoned: activeProjects.filter((p) => p.status === "abandoned").length,
+    avgLifespan: calculateAvgLifespan(activeProjects),
+    recent: activeProjects.filter((p) => daysSince(p.last_updated_at, currentTime) <= 7).length,
+    archived: archivedCount,
   }
 
   return (
@@ -61,7 +81,7 @@ export default async function DashboardPage({
           <p className="max-w-2xl text-sm text-muted-foreground">
             {safeProjects.length === 0
               ? "Track projects you paused, abandoned, finished, or may pick up again."
-              : `${safeProjects.length} total projects. ${stats.recent} updated in the last 7 days.`}
+              : `${stats.total} active projects. ${stats.recent} updated in the last 7 days.`}
           </p>
         </div>
         <Link
@@ -74,12 +94,32 @@ export default async function DashboardPage({
 
       <StatsCards stats={stats} />
 
-      {safeProjects.length === 0 ? (
+      {activeProjects.length === 0 && archivedCount === 0 ? (
         <div className="flex min-h-72 flex-col items-start justify-center rounded-lg border bg-card p-6">
           <h2 className="text-lg font-semibold">No projects yet</h2>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
             Add the first project with a status, progress, stack, and notes so
             the dashboard has something useful to summarize.
+          </p>
+          <Link
+            href="/dashboard/new"
+            className="mt-5 inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            New Project
+          </Link>
+        </div>
+      ) : activeProjects.length === 0 && archivedCount > 0 && activeFilter !== "archived" ? (
+        <div className="flex min-h-72 flex-col items-start justify-center rounded-lg border bg-card p-6">
+          <h2 className="text-lg font-semibold">All projects archived</h2>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            All your projects are archived. Switch to the{" "}
+            <a
+              href="/dashboard?status=archived"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              archived view
+            </a>{" "}
+            to see them.
           </p>
           <Link
             href="/dashboard/new"
@@ -96,17 +136,15 @@ export default async function DashboardPage({
                 const selected = activeFilter === status
                 const count =
                   status === "all"
-                    ? safeProjects.length
-                    : safeProjects.filter((project) => project.status === status).length
+                    ? safeProjects.filter((p) => !p.archived_at).length
+                    : status === "archived"
+                      ? safeProjects.filter((p) => p.archived_at).length
+                      : safeProjects.filter((p) => !p.archived_at && p.status === status).length
 
                 return (
                   <Link
                     key={status}
-                    href={
-                      status === "all"
-                        ? "/dashboard"
-                        : `/dashboard?status=${status}`
-                    }
+                    href={getDashboardHref(status, activeTag)}
                     className={[
                       "inline-flex h-8 items-center gap-2 rounded-md border px-3 text-sm transition-colors",
                       selected
@@ -114,12 +152,50 @@ export default async function DashboardPage({
                         : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
                     ].join(" ")}
                   >
-                    {status === "all" ? "All" : STATUS_LABELS[status]}
+                    {status === "all" ? "All" : status === "archived" ? "Archived" : STATUS_LABELS[status]}
                     <span className="text-xs opacity-70">{count}</span>
                   </Link>
                 )
               })}
             </div>
+
+            {tagOptions.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={getDashboardHref(activeFilter)}
+                  className={[
+                    "inline-flex h-8 items-center rounded-md border px-3 text-sm transition-colors",
+                    !activeTag
+                      ? "border-foreground/20 bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+                  ].join(" ")}
+                >
+                  All tags
+                </Link>
+                {tagOptions.map((tag) => {
+                  const selected = activeTag === tag
+                  const count = safeProjects.filter((project) =>
+                    (project.tags ?? []).includes(tag)
+                  ).length
+
+                  return (
+                    <Link
+                      key={tag}
+                      href={getDashboardHref(activeFilter, tag)}
+                      className={[
+                        "inline-flex h-8 items-center gap-2 rounded-md border px-3 text-sm transition-colors",
+                        selected
+                          ? "border-foreground/20 bg-foreground text-background"
+                          : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+                      ].join(" ")}
+                    >
+                      {tag}
+                      <span className="text-xs opacity-70">{count}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
 
             {filteredProjects.length === 0 ? (
               <div className="rounded-lg border bg-card p-6">
@@ -162,6 +238,16 @@ export default async function DashboardPage({
               value={getTopTechnologyLabel(safeProjects)}
               detail="Most common stack entry across saved and synced projects."
             />
+            <DashboardNote
+              label="Top Tag"
+              value={getTopTagLabel(safeProjects)}
+              detail="Most common category tag outside the tech stack."
+            />
+            <DashboardNote
+              label="Archived"
+              value={stats.archived.toString()}
+              detail="Projects moved to the archive. Change filter to view."
+            />
           </aside>
         </div>
       )}
@@ -189,8 +275,23 @@ function DashboardNote({
   )
 }
 
-function isStatusFilter(value: string | undefined): value is "all" | ProjectStatus {
+function isStatusFilter(value: string | undefined): value is StatusFilterOption {
   return STATUS_FILTERS.some((status) => status === value)
+}
+
+function getDashboardHref(status: StatusFilterOption, tag?: string): string {
+  const params = new URLSearchParams()
+
+  if (status !== "all") {
+    params.set("status", status)
+  }
+
+  if (tag) {
+    params.set("tag", tag)
+  }
+
+  const query = params.toString()
+  return query ? `/dashboard?${query}` : "/dashboard"
 }
 
 function daysSince(date: string, currentTime: number): number {
@@ -246,4 +347,24 @@ function getTopTechnologyLabel(projects: Project[]): string {
   const [topTechnology] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? []
 
   return topTechnology ?? "None"
+}
+
+function getTagOptions(projects: Project[]): string[] {
+  return Array.from(
+    new Set(projects.flatMap((project) => project.tags ?? []))
+  ).sort((a, b) => a.localeCompare(b))
+}
+
+function getTopTagLabel(projects: Project[]): string {
+  const counts = new Map<string, number>()
+
+  for (const project of projects) {
+    for (const tag of project.tags ?? []) {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1)
+    }
+  }
+
+  const [topTag] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? []
+
+  return topTag ?? "None"
 }

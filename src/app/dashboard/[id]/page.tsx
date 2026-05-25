@@ -10,6 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { NoteTimeline } from "@/components/note-timeline"
+import { ArchiveDialog, RestoreButton } from "@/components/archive-dialog"
+import { DeleteDialog } from "@/components/delete-dialog"
+import { PinButton } from "@/components/pin-button"
+import { RestartButton } from "@/components/restart-button"
 import { STATUS_LABELS, STATUS_ICONS, STOPPED_REASONS } from "@/lib/constants"
 import type { Project, ProjectNote } from "@/types"
 
@@ -52,11 +56,16 @@ export default async function ProjectDetailPage({
     ? STOPPED_REASONS.find((r) => r.value === project.stopped_reason)?.label
     : null
 
+  const isArchived = project.archived_at !== null
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
+            {project.pinned && (
+              <span className="text-muted-foreground" title="Pinned">📌</span>
+            )}
             <span className="text-2xl">{STATUS_ICONS[project.status]}</span>
             <h1 className="text-2xl font-bold">{project.name}</h1>
           </div>
@@ -65,12 +74,26 @@ export default async function ProjectDetailPage({
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
-          <Link
-            href={`/dashboard/${project.id}/edit`}
-            className="inline-flex h-7 items-center justify-center rounded-md border border-border bg-background px-2.5 text-[0.8rem] font-medium whitespace-nowrap text-foreground hover:bg-muted"
-          >
-            Edit
-          </Link>
+          <PinButton projectId={project.id} pinned={project.pinned} />
+          {isArchived ? (
+            <>
+              <RestoreButton projectId={project.id} />
+              <DeleteDialog projectId={project.id} />
+            </>
+          ) : (
+            <>
+              {(project.status === "abandoned" || project.status === "paused") && (
+                <RestartButton projectId={project.id} />
+              )}
+              <Link
+                href={`/dashboard/${project.id}/edit`}
+                className="inline-flex h-7 items-center justify-center rounded-md border border-border bg-background px-2.5 text-[0.8rem] font-medium whitespace-nowrap text-foreground hover:bg-muted"
+              >
+                Edit
+              </Link>
+              <ArchiveDialog projectId={project.id} />
+            </>
+          )}
         </div>
       </div>
 
@@ -81,8 +104,28 @@ export default async function ProjectDetailPage({
               Status
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-1">
             <p className="text-lg font-semibold">{STATUS_LABELS[project.status]}</p>
+            {project.restarted_at && (
+              <p className="text-xs text-muted-foreground">
+                Restarted{" "}
+                {new Date(project.restarted_at).toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </p>
+            )}
+            {isArchived && (
+              <p className="text-xs text-muted-foreground">
+                Archived{" "}
+                {new Date(project.archived_at!).toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </p>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -147,6 +190,11 @@ export default async function ProjectDetailPage({
       )}
 
       <div className="flex flex-wrap gap-2">
+        {(project.tags as string[] | undefined)?.map((tag) => (
+          <Badge key={tag} variant="outline">
+            {tag}
+          </Badge>
+        ))}
         {(project.technologies as string[] | undefined)?.map((tech) => (
           <Badge key={tech} variant="secondary">
             {tech}

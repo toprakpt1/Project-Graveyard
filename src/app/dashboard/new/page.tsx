@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { parseProjectTags, SUGGESTED_PROJECT_TAGS } from "@/lib/tags"
 
 export default function NewProjectPage() {
   const router = useRouter()
@@ -28,6 +29,7 @@ export default function NewProjectPage() {
       .split(",")
       .map((t) => t.trim())
       .filter(Boolean)
+    const tags = parseProjectTags(form.get("tags") as string)
     const githubRepoUrl = form.get("github_repo_url") as string
 
     const {
@@ -46,6 +48,7 @@ export default function NewProjectPage() {
       description: description || null,
       goal: goal || null,
       technologies,
+      tags,
       github_repo_url: githubRepoUrl || null,
       status: "active",
       progress: 0,
@@ -111,6 +114,25 @@ export default function NewProjectPage() {
                 name="technologies"
                 placeholder="React, Supabase, Expo (comma-separated)"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags</Label>
+              <Input
+                id="tags"
+                name="tags"
+                placeholder="#idea, #mvp, #tutorial"
+              />
+              <div className="flex flex-wrap gap-2">
+                {SUGGESTED_PROJECT_TAGS.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-md border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">

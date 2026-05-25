@@ -13,13 +13,17 @@ export function ProjectCard({
     (currentTime - new Date(project.last_updated_at).getTime()) / (1000 * 60 * 60 * 24)
   )
   const technologies = project.technologies ?? []
+  const tags = project.tags ?? []
   const progress = Math.min(100, Math.max(0, project.progress))
 
   return (
     <Link
       href={`/dashboard/${project.id}`}
-      className="block p-4 transition-colors hover:bg-muted/50"
+      className="relative block p-4 pr-3 transition-colors hover:bg-muted/50"
     >
+      {project.pinned && (
+        <span className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r-sm bg-foreground/30" />
+      )}
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px_120px] md:items-center">
         <div className="min-w-0 space-y-2">
           <div className="flex min-w-0 items-center gap-3">
@@ -45,6 +49,12 @@ export function ProjectCard({
             <p className="truncate text-xs text-muted-foreground">
               {technologies.slice(0, 4).join(", ")}
               {technologies.length > 4 ? ` +${technologies.length - 4}` : ""}
+            </p>
+          )}
+          {tags.length > 0 && (
+            <p className="truncate text-xs text-foreground/80">
+              {tags.slice(0, 4).join(" ")}
+              {tags.length > 4 ? ` +${tags.length - 4}` : ""}
             </p>
           )}
         </div>

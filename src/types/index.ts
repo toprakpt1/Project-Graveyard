@@ -23,6 +23,7 @@ export interface Project {
   description: string | null
   goal: string | null
   technologies: string[]
+  tags: string[]
   github_repo_url: string | null
   status: ProjectStatus
   progress: number
@@ -31,6 +32,10 @@ export interface Project {
   last_updated_at: string
   created_at: string
   updated_at: string
+  archived_at: string | null
+  restarted_at: string | null
+  pinned: boolean
+  pinned_at: string | null
   github_repo_id: number | null
   github_full_name: string | null
   github_default_branch: string | null

@@ -1,4 +1,5 @@
-import { GitBranch, RefreshCw, Trash2 } from "lucide-react"
+import { Bot, GitBranch, RefreshCw, Trash2 } from "lucide-react"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -146,6 +147,20 @@ export default async function SettingsPage({
           </div>
         )}
       </section>
+
+      <Link
+        href="/dashboard/settings/ai"
+        className="rounded-lg border bg-card p-4 flex items-center gap-3 hover:bg-muted transition-colors"
+      >
+        <Bot className="size-5" />
+        <div>
+          <h2 className="font-medium">AI settings</h2>
+          <p className="text-sm text-muted-foreground">
+            Configure an OpenRouter API key for project analysis.
+          </p>
+        </div>
+        <span className="ml-auto text-sm text-muted-foreground">&rarr;</span>
+      </Link>
     </div>
   )
 }

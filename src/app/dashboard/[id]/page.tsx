@@ -17,6 +17,7 @@ import { ArchiveDialog, RestoreButton } from "@/components/archive-dialog"
 import { DeleteDialog } from "@/components/delete-dialog"
 import { PinButton } from "@/components/pin-button"
 import { RestartButton } from "@/components/restart-button"
+import { AiAnalysisPanel } from "@/components/ai-analysis-panel"
 import { STATUS_LABELS, STATUS_ICONS, STOPPED_REASONS } from "@/lib/constants"
 import type {
   Project,
@@ -316,6 +317,26 @@ export default async function ProjectDetailPage({
           </CardContent>
         </Card>
       )}
+
+      <AiAnalysisPanel
+        projectId={project.id}
+        projectName={project.name}
+        projectContext={`Project: ${project.name}
+Description: ${project.description ?? "none"}
+Status: ${project.status}
+Progress: ${project.progress}%
+Technologies: ${(project.technologies ?? []).join(", ")}
+Tags: ${(project.tags ?? []).join(", ")}
+
+${project.github_repo_id ? `GitHub: ${project.github_full_name ?? ""}
+Last commit: ${project.github_last_commit_at ?? "unknown"}
+Last push: ${project.github_last_pushed_at ?? "unknown"}
+Stars: ${project.github_stars}
+Open issues: ${project.github_open_issues}` : ""}
+
+Stopped reason: ${stoppedReasonLabel ?? "none"}
+Started: ${new Date(project.started_at).toLocaleDateString()}`}
+      />
 
       <ProjectMilestones
         projectId={project.id}

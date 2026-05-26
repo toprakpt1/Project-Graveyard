@@ -100,3 +100,24 @@ export interface GithubConnection {
   created_at: string
   updated_at: string
 }
+
+export interface AiSettings {
+  id: string
+  user_id: string
+  openrouter_api_key_ciphertext: string | null
+  openrouter_api_key_last_four: string | null
+  model: string
+  ai_enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface AiAnalysis {
+  id: string
+  project_id: string
+  model: string
+  prompt: string
+  response: string
+  analyzed_at: string
+  created_at: string
+}

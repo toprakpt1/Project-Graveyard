@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { encryptSecret, decryptSecret } from "@/lib/crypto"
-import { analyzeProject, DEFAULT_MODEL, listModels } from "@/lib/openrouter"
+import { analyzeProject, chatWithProject, DEFAULT_MODEL, listModels } from "@/lib/openrouter"
 import type { AiSettings, Project, ProjectNote, ProjectStatusEvent } from "@/types"
 
 export async function analyzeProjectAction(
@@ -79,6 +79,39 @@ export async function saveAiSettings(formData: FormData) {
     const message = err instanceof Error ? err.message : "Failed to save"
     redirect(`/dashboard/settings/ai?message=${encodeURIComponent(message)}`)
   }
+}
+
+export async function askQuestionAction(
+  projectId: string,
+  question: string,
+  projectContext: string
+): Promise<string> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error("Not authenticated")
+  }
+
+  const { data: aiRaw } = await supabase
+    .from("ai_settings")
+    .select("openrouter_api_key_ciphertext, model, ai_enabled")
+    .eq("user_id", user.id)
+    .single()
+
+  const ai = aiRaw as Pick<
+    AiSettings,
+    "openrouter_api_key_ciphertext" | "model" | "ai_enabled"
+  > | null
+
+  if (!ai?.openrouter_api_key_ciphertext || !ai.ai_enabled) {
+    throw new Error("AI analysis is not configured. Add an API key in settings.")
+  }
+
+  const apiKey = decryptSecret(ai.openrouter_api_key_ciphertext)
+  const result = await chatWithProject(apiKey, ai.model, question, projectContext)
+
+  return result
 }
 
 export async function disconnectAi() {

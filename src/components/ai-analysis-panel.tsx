@@ -1,69 +1,113 @@
 "use client"
 
-import { useState } from "react"
-import { Sparkles } from "lucide-react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { analyzeProjectAction } from "@/app/dashboard/settings/ai/actions"
+import { askQuestionAction } from "@/app/dashboard/settings/ai/actions"
+
+type ChatMessage = {
+  role: "user" | "assistant"
+  content: string
+}
 
 export function AiAnalysisPanel({
   projectId,
-  projectName,
   projectContext,
 }: {
   projectId: string
   projectName: string
   projectContext: string
 }) {
-  const [analysis, setAnalysis] = useState<string | null>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const askedRef = useRef(false)
 
-  async function handleAnalyze() {
+  const ask = useCallback(async (question: string) => {
     setLoading(true)
     setError(null)
-    setAnalysis(null)
+    setMessages((prev) => [...prev, { role: "user", content: question }])
 
     try {
-      const result = await analyzeProjectAction(projectId, projectContext)
-      setAnalysis(result)
+      const result = await askQuestionAction(projectId, question, projectContext)
+      setMessages((prev) => [...prev, { role: "assistant", content: result }])
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Analysis failed")
+      const msg = err instanceof Error ? err.message : "Something went wrong"
+      setError(msg)
     } finally {
       setLoading(false)
     }
+  }, [projectId, projectContext])
+
+  useEffect(() => {
+    if (askedRef.current) return
+    askedRef.current = true
+    ask("Why did this project stop?")
+  }, [ask])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const q = input.trim()
+    if (!q || loading) return
+    setInput("")
+    await ask(q)
   }
 
   return (
-    <div className="rounded-lg border bg-card">
-      <div className="flex items-start justify-between gap-4 border-b p-4">
-        <div className="flex gap-3">
-          <Sparkles className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
-          <div>
-            <h2 className="font-medium">AI analysis</h2>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              Why did &ldquo;{projectName}&rdquo; stop? Based on the project
-              timeline, notes, and GitHub data.
-            </p>
+    <div className="flex flex-col rounded-lg border bg-card">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        {messages.length === 0 && !loading && (
+          <p className="text-sm text-muted-foreground">
+            Ask a question about this project.
+          </p>
+        )}
+
+        {messages.map((msg, i) => (
+          <div key={i}>
+            {msg.role === "user" && (
+              <p className="text-sm font-medium">{msg.content}</p>
+            )}
+            {msg.role === "assistant" && (
+              <div className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {msg.content}
+              </div>
+            )}
           </div>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAnalyze}
-          disabled={loading}
-        >
-          {loading ? "Analyzing…" : "Analyze"}
-        </Button>
+        ))}
+
+        {loading && (
+          <p className="text-sm italic text-muted-foreground/60">
+            Thinking…
+          </p>
+        )}
+
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+
+        <div ref={bottomRef} />
       </div>
 
-      {error && (
-        <div className="p-4 text-sm text-destructive">{error}</div>
-      )}
-
-      {analysis && (
-        <div className="p-4 text-sm leading-relaxed">{analysis}</div>
-      )}
+      <div className="border-t p-4">
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask something about this project…"
+            disabled={loading}
+            className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          />
+          <Button type="submit" size="sm" disabled={loading || !input.trim()}>
+            Ask
+          </Button>
+        </form>
+      </div>
     </div>
   )
 }

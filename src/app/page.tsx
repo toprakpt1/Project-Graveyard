@@ -9,9 +9,10 @@ import {
   History,
   RefreshCw,
   Search,
-  Skull,
+
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { GraveyardIcon } from "@/components/graveyard-icon"
 import { PublicNav } from "@/components/public-nav"
 import { buttonVariants } from "@/components/ui/button"
 
@@ -32,7 +33,7 @@ export default async function Home() {
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:px-6 md:py-24 lg:grid-cols-[1fr_430px] lg:items-center">
             <div className="max-w-2xl">
               <div className="mb-6 flex size-11 items-center justify-center rounded-lg border bg-card">
-                <Skull className="size-5" />
+                <GraveyardIcon className="size-5" />
               </div>
               <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">
                 Project Graveyard

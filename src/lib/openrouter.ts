@@ -26,6 +26,15 @@ export async function analyzeProject(
   model: string,
   projectContext: string
 ): Promise<string> {
+  return chatWithProject(apiKey, model, "Why did this project stop?", projectContext)
+}
+
+export async function chatWithProject(
+  apiKey: string,
+  model: string,
+  question: string,
+  projectContext: string
+): Promise<string> {
   const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
     method: "POST",
     headers: {
@@ -38,14 +47,14 @@ export async function analyzeProject(
         {
           role: "system",
           content:
-            "You are a project analysis assistant. Analyze why a project stopped based on the timeline, notes, and activity data. Be concise (2-3 sentences). Focus on patterns: motivation drop, scope creep, technical blockers, or time constraints.",
+            "You are a project analysis assistant. Answer the user's question about the project based on the provided project data. Be concise (2-3 sentences). Focus on patterns: motivation drop, scope creep, technical blockers, or time constraints.",
         },
         {
           role: "user",
-          content: projectContext,
+          content: `Project data:\n${projectContext}\n\nQuestion: ${question}`,
         },
       ],
-      max_tokens: 300,
+      max_tokens: 500,
       temperature: 0.3,
     }),
   })

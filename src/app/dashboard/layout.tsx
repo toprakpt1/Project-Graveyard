@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { LayoutDashboard, Plus, Settings, Skull } from "lucide-react"
+import { LayoutDashboard, Plus, Settings } from "lucide-react"
+import { GraveyardIcon } from "@/components/graveyard-icon"
 import { createClient } from "@/lib/supabase/server"
 import { buttonVariants } from "@/components/ui/button"
 import { UserNav } from "@/components/user-nav"
@@ -17,7 +18,7 @@ export default async function DashboardLayout({
       <header className="border-b bg-background">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 text-base font-semibold">
-            <Skull className="size-5" />
+            <GraveyardIcon className="size-5" />
             Project Graveyard
           </Link>
           <div className="flex items-center gap-1.5">

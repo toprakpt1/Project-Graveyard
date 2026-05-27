@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Project Graveyard",
   description: "A graveyard for your unfinished projects — collect, track, and resurrect them.",
+  icons: { icon: "/graveyard.svg" },
 }
 
 export default function RootLayout({

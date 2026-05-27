@@ -36,9 +36,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+mcp.log
+testsprite_tests/
+
 # agent
 .agents
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+testsprite_tests/tmp/config.json

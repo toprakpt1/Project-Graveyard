@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { Archive, CheckCircle2, GitBranch, Skull } from "lucide-react"
+import { Archive, CheckCircle2, GitBranch } from "lucide-react"
+import { GraveyardIcon } from "@/components/graveyard-icon"
 
 type AuthAsideProps = {
   title: string
@@ -66,7 +67,7 @@ export function AuthAside({
 
       <Link href="/" className="relative z-10 flex w-fit items-center gap-2 text-sm font-medium">
         <div className="flex size-8 items-center justify-center rounded-lg border bg-background">
-          <Skull className="size-4" />
+          <GraveyardIcon className="size-4" />
         </div>
         Project Graveyard
       </Link>

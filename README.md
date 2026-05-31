@@ -16,11 +16,7 @@
     A personal project tracker for developers who have accumulated unfinished side projects.
     <br />
     <br />
-<<<<<<< Updated upstream
-    <a href="project-graveyard-mu.vercel.app"><strong>View Demo »</strong></a>
-=======
     <a href="https://project-graveyard-mu.vercel.app"><strong>View Demo »</strong></a>
->>>>>>> Stashed changes
     &middot;
     <a href="https://github.com/toprakpt1/project-graveyard/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;

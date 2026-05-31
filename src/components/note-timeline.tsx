@@ -19,10 +19,16 @@ export function NoteTimeline({
   const [notes, setNotes] = useState(initialNotes)
   const [content, setContent] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   const supabase = createClient()
 
   const handleAdd = async () => {
+    setError("")
     if (!content.trim()) return
+    if (content.trim().length > 10000) {
+      setError("Note content must be under 10,000 characters.")
+      return
+    }
     setLoading(true)
 
     const { data, error } = await supabase
@@ -35,7 +41,8 @@ export function NoteTimeline({
       .single()
 
     if (error) {
-      console.error(error)
+      console.error("Failed to add note:", error.message)
+      setError("Failed to add note. Please try again.")
       setLoading(false)
       return
     }
@@ -82,6 +89,7 @@ export function NoteTimeline({
             {loading ? "Adding..." : "Add Note"}
           </Button>
         </div>
+        {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
 
       <Separator />

@@ -32,6 +32,23 @@ export default function NewProjectPage() {
     const tags = parseProjectTags(form.get("tags") as string)
     const githubRepoUrl = form.get("github_repo_url") as string
 
+    // Input uzunluk doğrulaması
+    if (name.length > 200) {
+      setError("Project name must be under 200 characters.")
+      setLoading(false)
+      return
+    }
+    if (description.length > 5000) {
+      setError("Description must be under 5,000 characters.")
+      setLoading(false)
+      return
+    }
+    if (goal.length > 2000) {
+      setError("Goal must be under 2,000 characters.")
+      setLoading(false)
+      return
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser()

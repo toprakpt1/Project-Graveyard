@@ -240,5 +240,7 @@ function mergeTechnologies(current: string[] | null, language: string | null): s
 }
 
 function getMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Something went wrong."
+  return error instanceof Error
+    ? "An unexpected error occurred. Please try again."
+    : "Something went wrong."
 }

@@ -102,7 +102,13 @@ You will also need a Supabase project set up for the database backend.
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    GITHUB_TOKEN_ENCRYPTION_KEY=replace-with-a-long-random-server-only-secret
    ```
-6. Run the development server
+6. Run the database migrations
+   ```sh
+   npx supabase link --project-ref your-project-ref
+   npx supabase db push
+   ```
+   > Alternatively, open the Supabase Dashboard → **SQL Editor**, and run each file from [`supabase/migrations/`](supabase/migrations/) in order (e.g. `00001_init.sql`, `00002_github_integration.sql`, etc.).
+7. Run the development server
    ```sh
    npm run dev
    ```
